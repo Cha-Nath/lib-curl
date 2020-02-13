@@ -5,12 +5,15 @@ namespace nlib\cURL\Classes;
 use nlib\cURL\Interfaces\cURLConstantInterface;
 use nlib\cURL\Interfaces\cURLInterface;
 use nlib\Tool\Interfaces\ArrayTraitInterface;
+use nlib\Log\Interfaces\LogTraitInterface;
 
+use nlib\Log\Traits\LogTrait;
 use nlib\Tool\Traits\ArrayTrait;
 
-class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface {
+class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface, LogTraitInterface {
 
     use ArrayTrait;
+    use LogTrait;
 
     private $_url;
     private $_encoding = self::JSON;
@@ -61,6 +64,8 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface 
 
         if(method_exists($this, $method = 'set' . $type . 'Options')) $this->{$method}($options, ...$params);
         
+        $this->log(['cURL Options' => json_encode($options)]);
+
         return $options;
     }
 
