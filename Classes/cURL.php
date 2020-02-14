@@ -69,7 +69,7 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
         return $options;
     }
 
-    protected function setPostOptions(array &$options, ...$params) : self {
+    protected function setPostOptions(array &$options, $params) : self {
 
         $options[CURLOPT_URL] = $this->getUrl();
 
@@ -81,9 +81,9 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
         return $this;
     }
 
-    protected function setGetOptions(array &$options, ...$params) : self {
-
-        $options[CURLOPT_URL] = $this->getUrl() . '?' . urlencode(json_encode($params));
+    protected function setGetOptions(array &$options, $params) : self {
+        
+        $options[CURLOPT_URL] = $this->getUrl() . '?' . $this->assoc_to_GET($params, 1);
         return $this;
     }
 
@@ -92,7 +92,11 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
     }
 
     protected function getStringEncoding(array $params) : string {
-        return $this->array_to_GET($params, 1);
+        return $this->is_assoc($params) ? $this->assoc_to_GET($params, 1) : $this->array_to_GET($params, 1);
+    }
+
+    protected function getArrayEncoding(array $params) : array {
+        return $params;
     }
 
     #endregion
@@ -108,7 +112,10 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
     #region Setter
 
     public function setUrl(string $url) : self { $this->_url = $url; return $this; }
-    public function setEncoding(string $encoding) : self { $this->_encoding = $encoding; return $this; }
+    public function setEncoding(string $encoding) : self {
+        $this->_encoding = in_array($encoding, self::ENCODINGS)
+            ? $encoding : self::JSON; return $this;
+    }
     public function setHttpheaders(array $httpheaders) : self { $this->_httpheaders = $httpheaders; return $this; }
     
     #endregion
