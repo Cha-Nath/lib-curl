@@ -17,7 +17,8 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
 
     private $_url;
     private $_encoding = self::JSON;
-    private $_httpheaders = ['Content-Type: application/x-www-form-urlencoded'];
+    private $_httpheaders = [];
+    private $_content_type = '';
 
     public function __construct(string $url) { $this->setUrl($url); }
 
@@ -51,6 +52,9 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
 
         if(!in_array(strtoupper($type), self::METHODS)) die ('Type is not correct.');
         
+        $httpheaders = $this->getHttpheaders();
+        if(!empty($content_type = $this->getContentType())) $httpheaders[] = $content_type;
+
         $options = [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
@@ -59,7 +63,7 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => $type,
             CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_HTTPHEADER => $this->getHttpheaders(),
+            CURLOPT_HTTPHEADER => $httpheaders,
         ];
 
         if(method_exists($this, $method = 'set' . $type . 'Options')) $this->{$method}($options, ...$params);
@@ -106,6 +110,7 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
     public function getUrl() : string { return $this->_url; }
     public function getEncoding() : string { return $this->_encoding; }
     public function getHttpheaders() : array { return $this->_httpheaders; }
+    public function getContentType() : string { return $this->_content_type; }
     
     #endregion
 
@@ -117,6 +122,10 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
             ? $encoding : self::JSON; return $this;
     }
     public function setHttpheaders(array $httpheaders) : self { $this->_httpheaders = $httpheaders; return $this; }
+    public function setContentType(string $content_type) : self {
+        $this->_content_type = in_array($content_type, self::CONTENT_TYPES)
+            ? $content_type : ''; return $this;
+    }
     
     #endregion
 
