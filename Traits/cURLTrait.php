@@ -10,8 +10,9 @@ trait cURLTrait {
 
     #region Getter
 
-    public function cURL(string $url = '') : cURL {
+    public function cURL(string $url) : cURL {
         if(empty($this->_curl)) $this->setcURL(new cURL($url));
+        else $this->_curl->setUrl($url);
         return $this->_curl;
     }
 

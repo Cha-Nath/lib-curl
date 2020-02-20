@@ -11,7 +11,7 @@ interface cURLTraitInterface {
      * @param string $url
      * @return cURL
      */
-    public function cURl(string $url = '') : cURL;
+    public function cURl(string $url) : cURL;
     
     /**
      *
