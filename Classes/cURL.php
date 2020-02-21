@@ -73,7 +73,7 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
         return $options;
     }
 
-    protected function setPostOptions(array &$options, $params) : self {
+    protected function setPostOptions(array &$options, $params = []) : self {
 
         $options[CURLOPT_URL] = $this->getUrl();
 
@@ -85,9 +85,12 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
         return $this;
     }
 
-    protected function setGetOptions(array &$options, $params) : self {
+    protected function setGetOptions(array &$options, $params = []) : self {
         
-        $options[CURLOPT_URL] = $this->getUrl() . '?' . $this->assoc_to_GET($params, 1);
+        $url = $this->getUrl();
+        if(!empty($params)) $url .= '?' . $this->assoc_to_GET($params, 1);
+        $options[CURLOPT_URL] = $url;
+        
         return $this;
     }
 
