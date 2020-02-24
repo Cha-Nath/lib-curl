@@ -89,7 +89,7 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
         
         $url = $this->getUrl();
         $starter = preg_match ('/[?]/', $url) ? '' : '?';
-        if(!empty($params)) $url .= $starter . $this->assoc_to_GET($params, 1);
+        if(!empty($params)) $url .= $starter . $this->getStringEncoding($params);
         $options[CURLOPT_URL] = $url;
         
         return $this;
