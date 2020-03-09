@@ -88,7 +88,7 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
     protected function setGetOptions(array &$options, $params = []) : self {
         
         $url = $this->getUrl();
-        $starter = preg_match ('/[?]/', $url) ? '' : '?';
+        $starter = preg_match ('/[?]/', $url) ? '&' : '?';
         if(!empty($params)) $url .= $starter . $this->getStringEncoding($params);
         $options[CURLOPT_URL] = $url;
         
