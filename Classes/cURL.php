@@ -8,6 +8,7 @@ use nlib\Tool\Interfaces\ArrayTraitInterface;
 use nlib\Log\Interfaces\LogTraitInterface;
 
 use nlib\Log\Traits\LogTrait;
+use nlib\Path\Classes\Path;
 use nlib\Tool\Traits\ArrayTrait;
 
 class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface, LogTraitInterface {
@@ -26,6 +27,7 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
 
     public function get(...$params) { return $this->call(self::GET, ...$params); }
     public function post(...$params) { return $this->call(self::POST, ...$params); }
+    public function put(...$params) { return $this->call(self::PUT, ...$params); }
 
     #endregion
 
@@ -33,7 +35,7 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
 
     protected function call(string $type, ...$params) {
 
-        if(empty($this->getUrl())) die('URL cannot be empty.');
+        if(empty($this->getUrl())) $this->dlog(['\nlib\cURL\Classes\cURL::call' => 'URL cannot be empty.']);
         
         $curl = curl_init();
         curl_setopt_array($curl, $this->getOptions($type, ...$params));
@@ -43,14 +45,14 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
 
         curl_close($curl);
 
-        if(!empty($error)) die('cURL error #: ' . $error);
+        if(!empty($error)) $this->dlog(['\nlib\cURL\Classes\cURL::call' => 'cURL error #: ' . $error]);
 
         return $response;
     }
 
     protected function getOptions(string $type, ...$params) : array {
 
-        if(!in_array(strtoupper($type), self::METHODS)) die ('Type is not correct.');
+        if(!in_array(strtoupper($type), self::METHODS)) $this->dlog(['\nlib\cURL\Classes\cURL::getOptions' => 'Type is not correct.']);
         
         $httpheaders = $this->getHttpheaders();
         if(!empty($content_type = $this->getContentType())) $httpheaders[] = $content_type;
@@ -65,6 +67,16 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
             CURLOPT_SSL_VERIFYPEER => false,
             CURLOPT_HTTPHEADER => $httpheaders,
         ];
+
+        if(!empty($cookie = $this->getCookie())) :
+
+            Path::i()->setCache();
+
+            $cookie = Path::i()->getCache() . $cookie . '.curl.txt';
+            $options[CURLOPT_COOKIESESSION] = true;
+            $options[CURLOPT_COOKIEJAR] = $cookie;
+            $options[CURLOPT_COOKIEFILE] = $cookie;
+        endif;
 
         if(method_exists($this, $method = 'set' . $type . 'Options')) $this->{$method}($options, ...$params);
         
@@ -82,6 +94,12 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
             $options[CURLOPT_POSTFIELDS] = $this->{$method}($params);
         endif;
         
+        return $this;
+    }
+
+    protected function setPutOptions(array &$options, $params = []) : self {
+
+        $this->setPostOptions($options, $params);  
         return $this;
     }
 
@@ -115,6 +133,7 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
     public function getEncoding() : string { return $this->_encoding; }
     public function getHttpheaders() : array { return $this->_httpheaders; }
     public function getContentType() : string { return $this->_content_type; }
+    public function getCookie() : string { return $this->_hascookie; }
     
     #endregion
 
@@ -130,6 +149,7 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
         $this->_content_type = in_array($content_type, self::CONTENT_TYPES)
             ? $content_type : ''; return $this;
     }
+    public function setCookie(string $cookie) : self { $this->_hascookie = $cookie; return $this; }
     
     #endregion
 
