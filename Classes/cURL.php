@@ -20,6 +20,7 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
     private $_encoding = self::JSON;
     private $_httpheaders = [];
     private $_content_type = '';
+    private $_cookie = '';
 
     public function __construct(string $url) { $this->setUrl($url); }
 
@@ -35,7 +36,7 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
 
     protected function call(string $type, ...$params) {
 
-        if(empty($this->getUrl())) $this->dlog(['\nlib\cURL\Classes\cURL::call' => 'URL cannot be empty.']);
+        if(empty($this->getUrl())) $this->dlog([__CLASS__ . '::' . __FUNCTION__ => 'URL cannot be empty.']);
         
         $curl = curl_init();
         curl_setopt_array($curl, $this->getOptions($type, ...$params));
@@ -45,14 +46,14 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
 
         curl_close($curl);
 
-        if(!empty($error)) $this->dlog(['\nlib\cURL\Classes\cURL::call' => 'cURL error #: ' . $error]);
+        if(!empty($error)) $this->dlog([__CLASS__ . '::' . __FUNCTION__ => 'cURL error #: ' . $error]);
 
         return $response;
     }
 
     protected function getOptions(string $type, ...$params) : array {
 
-        if(!in_array(strtoupper($type), self::METHODS)) $this->dlog(['\nlib\cURL\Classes\cURL::getOptions' => 'Type is not correct.']);
+        if(!in_array(strtoupper($type), self::METHODS)) $this->dlog([__CLASS__ . '::' . __FUNCTION__ => 'Type is not correct.']);
         
         $httpheaders = $this->getHttpheaders();
         if(!empty($content_type = $this->getContentType())) $httpheaders[] = $content_type;
@@ -133,7 +134,7 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
     public function getEncoding() : string { return $this->_encoding; }
     public function getHttpheaders() : array { return $this->_httpheaders; }
     public function getContentType() : string { return $this->_content_type; }
-    public function getCookie() : string { return $this->_hascookie; }
+    public function getCookie() : string { return $this->_cookie; }
     
     #endregion
 
@@ -149,7 +150,7 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
         $this->_content_type = in_array($content_type, self::CONTENT_TYPES)
             ? $content_type : ''; return $this;
     }
-    public function setCookie(string $cookie) : self { $this->_hascookie = $cookie; return $this; }
+    public function setCookie(string $cookie) : self { $this->_cookie = $cookie; return $this; }
     
     #endregion
 
