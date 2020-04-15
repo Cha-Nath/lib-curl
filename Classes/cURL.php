@@ -7,6 +7,7 @@ use nlib\cURL\Interfaces\cURLInterface;
 use nlib\Tool\Interfaces\ArrayTraitInterface;
 use nlib\Log\Interfaces\LogTraitInterface;
 
+use nlib\Log\Traits\DebugTrait;
 use nlib\Log\Traits\LogTrait;
 use nlib\Path\Classes\Path;
 use nlib\Tool\Traits\ArrayTrait;
@@ -15,6 +16,7 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
 
     use ArrayTrait;
     use LogTrait;
+    use DebugTrait;
 
     private $_url;
     private $_encoding = self::JSON;
@@ -39,8 +41,9 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
         if(empty($this->getUrl())) $this->dlog([__CLASS__ . '::' . __FUNCTION__ => 'URL cannot be empty.']);
         
         $curl = curl_init();
-        curl_setopt_array($curl, $this->getOptions($type, ...$params));
-        
+        curl_setopt_array($curl, $options = $this->getOptions($type, ...$params));
+        $this->debug($options);
+
         $response = curl_exec($curl);
         $error = curl_error($curl);
 

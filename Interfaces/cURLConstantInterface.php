@@ -12,10 +12,10 @@ interface cURLConstantInterface {
     const _STRING = 'string';
     const _ARRAY = 'array';
 
-    const APPLICATION = 'Content-Type: application/x-www-form-urlencoded';
-    const MULTIPART = 'Content-Type: multipart/form-data';
-    const TEXT = 'Content-Type: text/plain';
-    const APPLICATION_JSON = 'Content-Type: application/json';
+    const APPLICATION = 'Content-Type: application/x-www-form-urlencoded;charset=UTF-8;';
+    const MULTIPART = 'Content-Type: multipart/form-data;charset=UTF-8;';
+    const TEXT = 'Content-Type: text/plain;charset=UTF-8;';
+    const APPLICATION_JSON = 'Content-Type: application/json;charset=UTF-8;';
 
     const METHODS = [self::GET, self::POST, self::PUT];
     const ENCODINGS = [self::JSON, self::_STRING, self::_ARRAY];   
