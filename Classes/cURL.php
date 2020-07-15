@@ -4,6 +4,7 @@ namespace nlib\cURL\Classes;
 
 use nlib\cURL\Interfaces\cURLConstantInterface;
 use nlib\cURL\Interfaces\cURLInterface;
+use nlib\Instance\Traits\InstanceTrait;
 use nlib\Tool\Interfaces\ArrayTraitInterface;
 use nlib\Log\Interfaces\LogTraitInterface;
 
@@ -17,6 +18,7 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
     use ArrayTrait;
     use LogTrait;
     use DebugTrait;
+    use InstanceTrait;
 
     private $_url;
     private $_encoding = self::JSON;
@@ -74,9 +76,9 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
 
         if(!empty($cookie = $this->getCookie())) :
 
-            Path::i()->setCache();
+            Path::i($this->_i())->setCache();
 
-            $cookie = Path::i()->getCache() . $cookie . '.curl.txt';
+            $cookie = Path::i($this->_i())->getCache() . $cookie . '.curl.txt';
             $options[CURLOPT_COOKIESESSION] = true;
             $options[CURLOPT_COOKIEJAR] = $cookie;
             $options[CURLOPT_COOKIEFILE] = $cookie;

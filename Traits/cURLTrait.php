@@ -11,9 +11,10 @@ trait cURLTrait {
     #region Getter
 
     public function cURL(string $url) : cURL {
+        $instance = (method_exists($this, $method = '_i')) ? $this->{$method}() : 'i';
         if(empty($this->_curl)) $this->setcURL(new cURL($url));
         else $this->_curl->setUrl($url);
-        return $this->_curl;
+        return $this->_curl->setInstance($instance);
     }
 
     #endregion
