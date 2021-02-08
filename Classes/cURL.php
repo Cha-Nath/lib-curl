@@ -83,7 +83,7 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
 
         if(method_exists($this, $method = 'set' . $type . 'HandlerOptions')) $this->{$method}($options, ...$params);
 
-        $options = array_merge($options, $this->getOptions());
+        $options = $this->array_merge($options, $this->getOptions());
         
         $this->log([$log => 'cURL Options : ' . json_encode($options)]);
 
