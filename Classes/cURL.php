@@ -25,10 +25,11 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
     private $_httpheaders = [];
     private $_content_type = '';
     private $_cookie = '';
+    private $_options = [];
 
     public function __construct(string $url) { $this->setUrl($url); }
 
-    #region Public
+    #region Public Method
 
     public function get(...$params) { return $this->call(self::GET, ...$params); }
     public function post(...$params) { return $this->call(self::POST, ...$params); }
@@ -36,14 +37,14 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
 
     #endregion
 
-    #region Protected
+    #region Protected Method
 
     protected function call(string $type, ...$params) {
 
         if(empty($this->getUrl())) $this->dlog([__CLASS__ . '::' . __FUNCTION__ => 'URL cannot be empty.']);
         
         $curl = curl_init();
-        curl_setopt_array($curl, $options = $this->getOptions($type, ...$params));
+        curl_setopt_array($curl, $options = $this->getHandlerOptions($type, ...$params));
         $this->debug($options);
 
         $response = curl_exec($curl);
@@ -56,67 +57,37 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
         return $response;
     }
 
-    protected function getOptions(string $type, ...$params) : array {
+    #endregion
 
-        if(!in_array(strtoupper($type), self::METHODS)) $this->dlog([__CLASS__ . '::' . __FUNCTION__ => 'Type is not correct.']);
+    #region Protected Getter
+
+    protected function getHandlerOptions(string $type, ...$params) : array {
+
+        $log = __CLASS__ . '::' . __FUNCTION__;
+
+        if(!in_array(strtoupper($type), self::METHODS)) $this->dlog([$log => 'Type is not correct.']);
         
         $httpheaders = $this->getHttpheaders();
         if(!empty($content_type = $this->getContentType())) $httpheaders[] = $content_type;
 
-        $options = [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 60,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => $type,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_HTTPHEADER => $httpheaders,
-        ];
+        $options = $this->getDefaultOptions() + [CURLOPT_CUSTOMREQUEST => $type, CURLOPT_HTTPHEADER => $httpheaders];
 
         if(!empty($cookie = $this->getCookie())) :
 
             Path::i($this->_i())->setCache();
 
             $cookie = Path::i($this->_i())->getCache() . $cookie . '.curl.txt';
-            $options[CURLOPT_COOKIESESSION] = true;
-            $options[CURLOPT_COOKIEJAR] = $cookie;
-            $options[CURLOPT_COOKIEFILE] = $cookie;
+            $options + [CURLOPT_COOKIESESSION => true, CURLOPT_COOKIEJAR => $cookie, CURLOPT_COOKIEFILE => $cookie];
+
         endif;
 
-        if(method_exists($this, $method = 'set' . $type . 'Options')) $this->{$method}($options, ...$params);
+        if(method_exists($this, $method = 'set' . $type . 'HandlerOptions')) $this->{$method}($options, ...$params);
+
+        $options = array_merge($options, $this->getOptions());
         
-        $this->log(['cURL Options' => json_encode($options)]);
+        $this->log([$log => 'cURL Options : ' . json_encode($options)]);
 
         return $options;
-    }
-
-    protected function setPostOptions(array &$options, $params = []) : self {
-
-        $options[CURLOPT_URL] = $this->getUrl();
-
-        if(method_exists($this, $method = 'get' . $this->getEncoding() . 'Encoding')) :
-            $options[CURLOPT_POST] = true;
-            $options[CURLOPT_POSTFIELDS] = $this->{$method}($params);
-        endif;
-        
-        return $this;
-    }
-
-    protected function setPutOptions(array &$options, $params = []) : self {
-
-        $this->setPostOptions($options, $params);  
-        return $this;
-    }
-
-    protected function setGetOptions(array &$options, $params = []) : self {
-        
-        $url = $this->getUrl();
-        $starter = preg_match ('/[?]/', $url) ? '&' : '?';
-        if(!empty($params)) $url .= $starter . $this->getStringEncoding($params);
-        $options[CURLOPT_URL] = $url;
-        
-        return $this;
     }
 
     protected function getJsonEncoding(array $params) : string {
@@ -133,6 +104,38 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
 
     #endregion
 
+    #region Protected Setter
+
+    protected function setPostHandlerOptions(array &$options, $params = []) : self {
+
+        $options[CURLOPT_URL] = $this->getUrl();
+
+        if(method_exists($this, $method = 'get' . $this->getEncoding() . 'Encoding')) :
+            $options[CURLOPT_POST] = true;
+            $options[CURLOPT_POSTFIELDS] = $this->{$method}($params);
+        endif;
+        
+        return $this;
+    }
+
+    protected function setPutHandlerOptions(array &$options, $params = []) : self {
+
+        $this->setPostHandlerOptions($options, $params);  
+        return $this;
+    }
+
+    protected function setGetHandlerOptions(array &$options, $params = []) : self {
+        
+        $url = $this->getUrl();
+        $starter = preg_match ('/[?]/', $url) ? '&' : '?';
+        if(!empty($params)) $url .= $starter . $this->getStringEncoding($params);
+        $options[CURLOPT_URL] = $url;
+        
+        return $this;
+    }
+
+    #endregion
+
     #region Getter
      
     public function getUrl() : string { return $this->_url; }
@@ -140,6 +143,20 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
     public function getHttpheaders() : array { return $this->_httpheaders; }
     public function getContentType() : string { return $this->_content_type; }
     public function getCookie() : string { return $this->_cookie; }
+    public function getOptions() : array { return $this->_options; }
+
+    public function getDefaultOptions() : array {
+        
+        return 
+        [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 60,
+            CURLOPT_HTTP_VERSION => \CURL_HTTP_VERSION_1_1,
+            CURLOPT_SSL_VERIFYPEER => false,
+        ];
+    }
     
     #endregion
 
@@ -156,6 +173,7 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
             ? $content_type : ''; return $this;
     }
     public function setCookie(string $cookie) : self { $this->_cookie = $cookie; return $this; }
+    public function setOptions(array $options) : self { $this->_options = $options; return $this; }
     
     #endregion
 
