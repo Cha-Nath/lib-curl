@@ -7,16 +7,37 @@ interface cURLInterface {
     /**
      *
      * @param [type] ...$params
-     * @return unknown
+     * @return mixed
      */
     public function get(...$params);
 
     /**
      *
      * @param [type] ...$params
-     * @return unknown
+     * @return mixed
      */
     public function post(...$params);
+
+    /**
+     *
+     * @param [type] ...$params
+     * @return mixed
+     */
+    public function put(...$params);
+
+    /**
+     *
+     * @param [type] ...$params
+     * @return mixed
+     */
+    public function patch(...$params);
+
+    /**
+     *
+     * @param [type] ...$params
+     * @return mixed
+     */
+    public function delete(...$params);
 
     /**
      *
@@ -41,7 +62,25 @@ interface cURLInterface {
      * @return string
      */
     public function getContentType() : string;
-    
+
+    /**
+     *
+     * @return string
+     */
+    public function getCookie() : string;
+
+    /**
+     *
+     * @return array
+     */
+    public function getOptions() : array;
+
+    /**
+     *
+     * @return array
+     */
+    public function getDefaultOptions() : array;
+
     /**
      *
      * @param string $url
@@ -69,4 +108,18 @@ interface cURLInterface {
      * @return self
      */
     public function setContentType(string $content_type);
+
+    /**
+     *
+     * @param string $cookie
+     * @return self
+     */
+    public function setCookie(string $cookie);
+
+    /**
+     *
+     * @param array $options
+     * @return self
+     */
+    public function setOptions(array $options);
 }

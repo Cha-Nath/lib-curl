@@ -34,6 +34,8 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
     public function get(...$params) { return $this->call(self::GET, ...$params); }
     public function post(...$params) { return $this->call(self::POST, ...$params); }
     public function put(...$params) { return $this->call(self::PUT, ...$params); }
+    public function patch(...$params) { return $this->call(self::PATCH, ...$params); }
+    public function delete(...$params) { return $this->call(self::DELETE, ...$params); }
 
     #endregion
 
@@ -119,6 +121,18 @@ class cURL implements cURLConstantInterface, cURLInterface, ArrayTraitInterface,
     }
 
     protected function setPutHandlerOptions(array &$options, $params = []) : self {
+
+        $this->setPostHandlerOptions($options, $params);  
+        return $this;
+    }
+
+    protected function setPatchHandlerOptions(array &$options, $params = []) : self {
+
+        $this->setPostHandlerOptions($options, $params);  
+        return $this;
+    }
+
+    protected function setDeleteHandlerOptions(array &$options, $params = []) : self {
 
         $this->setPostHandlerOptions($options, $params);  
         return $this;
