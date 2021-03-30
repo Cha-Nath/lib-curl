@@ -19,6 +19,8 @@ interface cURLConstantInterface {
     const TEXT = 'Content-Type: text/plain;charset=UTF-8;';
     const APPLICATION_JSON = 'Content-Type: application/json;charset=UTF-8;';
 
+    const APPLICATION_JSON_ACCEPT = 'accept: application/json';
+
     const METHODS = [self::GET, self::POST, self::PUT, self::PATCH, self::DELETE];
     const ENCODINGS = [self::JSON, self::_STRING, self::_ARRAY];   
     const RESPONSES = [self::JSON];
