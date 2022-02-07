@@ -3,7 +3,7 @@
     "description": "Library cURL",
     "license": "MIT",
     "require": {
-        "php": "^7.1.3",
+        "php": "^7.1.3|^8.0",
         "nlib/lib-tool" : "dev-master@dev",
         "nlib/lib-log" : "dev-master@dev",
         "nlib/lib-path" : "dev-master@dev",
